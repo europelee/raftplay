@@ -256,7 +256,7 @@ func (p *Election) Start() error {
 
 			if p.nodeCurStat == Leader && joinSucc == false {
 				joinFail := false
-				for _, node := range p.raftPeers.NetAddrs {
+				for _, node := range p.raftPeers {
 					if node.String() == p.raftBindAddr.String() {
 						continue
 					}

@@ -23,6 +23,7 @@ func init() {
 func main() {
 	fmt.Println("raftplay start")
 	flag.Parse()
+	fmt.Println(raftPeers, raftEnableSingle, raftBindAddr, raftDataDir)
 	electionInst := election.New(raftBindAddr, raftDataDir, raftPeers, raftEnableSingle)
 	electionInst.Start()
 }

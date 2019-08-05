@@ -19,9 +19,7 @@ type NetAddr struct {
 }
 
 //NetAddrList []NetAddr
-type NetAddrList struct {
-	NetAddrs []NetAddr
-}
+type NetAddrList []NetAddr
 
 //Set parse <IP>:<Port>
 func (p *NetAddr) Set(s string) error {
@@ -44,6 +42,7 @@ func (p *NetAddr) String() string {
 
 //Set parse <netaddr>,<netaddr>
 func (nl *NetAddrList) Set(s string) error {
+	fmt.Println(s)
 	varSlice := strings.Split(s, addrListSepFlag)
 	for _, netAddrStr := range varSlice {
 		var addrInst NetAddr
@@ -51,7 +50,7 @@ func (nl *NetAddrList) Set(s string) error {
 		if err != nil {
 			return err
 		}
-		nl.NetAddrs = append(nl.NetAddrs, addrInst)
+		*nl = append(*nl, addrInst)
 	}
 	return nil
 }
