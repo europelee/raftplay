@@ -10,17 +10,21 @@ import (
 	restful "github.com/emicklei/go-restful"
 )
 
+type Node struct {
+	ID string `json:"id"`
+}
+
 var (
-	StatHandler *Handler
+	ElecOpHandler *Handler
 )
 
 const (
-	statsPath = "/stats"
+	operPath = "/operations"
 )
 
 func CreateHandler(o election.Operation) *Handler {
-	StatHandler = &Handler{operation: o}
-	return StatHandler
+	ElecOpHandler = &Handler{operation: o}
+	return ElecOpHandler
 }
 
 // Handler as resource
@@ -30,7 +34,7 @@ type Handler struct {
 
 func (h *Handler) Register(server *utils.APIServer) {
 	ws := &restful.WebService{}
-	ws.Path(statsPath).
+	ws.Path(operPath).
 		Produces(restful.MIME_JSON).
 		Consumes(restful.MIME_JSON)
 	endpoints := []struct {
@@ -38,9 +42,7 @@ func (h *Handler) Register(server *utils.APIServer) {
 		method  string
 		handler restful.RouteFunction
 	}{
-		{"/keyWatch", "POST", h.createKeyWatch},
-		{"/keyWatch/{db}/{key}", "DELETE", h.removeKeyWatch},
-		{"/keyWatch/{db}/{key}", "GET", h.queryKeyWatch},
+		{"/leaderShip", "POST", h.transferLeaderShip},
 	}
 
 	for _, e := range endpoints {
@@ -52,15 +54,18 @@ func (h *Handler) Register(server *utils.APIServer) {
 	server.Add(ws)
 }
 
-func (h *Handler) createKeyWatch(request *restful.Request, response *restful.Response) {
-	utils.Logger.Info(fmt.Sprintf("createKeyWatch[%v]", request))
-	key := new(Key)
-	err := request.ReadEntity(&key)
+func (h *Handler) transferLeaderShip(request *restful.Request, response *restful.Response) {
+	node := new(Node)
+	err := request.ReadEntity(&node)
 	if err == nil {
-		WatchObj.RegisterKeyWatch(key.String())
-		response.WriteHeaderAndEntity(http.StatusCreated, key)
-	} else {
-		utils.Logger.Error(err.Error())
+		err = h.operation.TransferLeaderShip(node.ID, node.ID)
+		if err == nil {
+			response.WriteHeaderAndEntity(http.StatusCreated, node)
+		}
+
+	}
+	if err != nil {
+		fmt.Println(err.Error())
 		response.WriteErrorString(http.StatusBadRequest, err.Error())
 	}
 }
