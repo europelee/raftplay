@@ -112,6 +112,10 @@ func (p *Election) RemovePeer(id string) error {
 	return nil
 }
 
+func (p *Election) TransferLeaderShip(address string) error {
+
+}
+
 // Join let peers join into cluster
 func (p *Election) Join(id, addr string) error {
 	if p.raft.State() != raft.Leader {
