@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 
+	raftoperation "github.com/europelee/raftplay/internal/raft_operation"
 	"github.com/europelee/raftplay/pkg/election"
 	"github.com/europelee/raftplay/pkg/utils"
 )
@@ -25,5 +26,14 @@ func main() {
 	flag.Parse()
 	fmt.Println(raftPeers, raftEnableSingle, raftBindAddr, raftDataDir)
 	electionInst := election.New(raftBindAddr, raftDataDir, raftPeers, raftEnableSingle)
-	electionInst.Start()
+	go electionInst.Start()
+	go func() {
+		s := utils.NewAPIServer()
+		hdl := raftoperation.CreateHandler(electionInst)
+		hdl.Register(s)
+		utils.ListenAndServeAPIServer(
+			"0.0.0.0",
+			8181)
+	}()
+	select {}
 }
