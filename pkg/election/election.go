@@ -172,6 +172,7 @@ func (p *Election) Start() error {
 		if err != nil {
 			fmt.Println(err)
 		}
+		newNode = true
 	}
 	cfg := raft.DefaultConfig()
 	cfg.LogOutput = os.Stdout
@@ -194,9 +195,11 @@ func (p *Election) Start() error {
 		log.Fatal(err)
 	}
 	p.raft = r
-	if p.enableSingle {
 
-		bootstrapConfig := raft.Configuration{
+	if newNode {
+		var bootstrapConfig raft.Configuration
+
+		bootstrapConfig = raft.Configuration{
 			Servers: []raft.Server{
 				{
 					Suffrage: raft.Voter,
@@ -205,9 +208,10 @@ func (p *Election) Start() error {
 				},
 			},
 		}
-		/*
+
+		if !p.enableSingle {
 			// Add known peers to bootstrap
-			for _, node := range p.raftPeers.NetAddrs {
+			for _, node := range p.raftPeers {
 
 				if node.String() == p.raftBindAddr.String() {
 					continue
@@ -219,14 +223,16 @@ func (p *Election) Start() error {
 					Address:  raft.ServerAddress(node.String()),
 				})
 			}
-		*/
+		}
 
 		f := r.BootstrapCluster(bootstrapConfig)
-
 		if err := f.Error(); err != nil {
 			log.Fatalf("error bootstrapping: %s", err)
 		}
+	} else {
+		fmt.Println("no need boostrap")
 	}
+
 	t := time.NewTicker(time.Duration(3) * time.Second)
 	defer func() {
 		t.Stop()
@@ -274,7 +280,7 @@ func (p *Election) Start() error {
 					// we take id and address as the same value
 					joinErr := p.Join(node.String(), node.String())
 					if joinErr != nil {
-						fmt.Println("joinErr != nil")
+						fmt.Println("joinErr != nil", joinErr.Error())
 						joinFail = true
 					} else {
 						continue

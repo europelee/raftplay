@@ -11,7 +11,7 @@ import (
 
 var raftBindAddr = utils.NetAddr{IP: "127.0.0.1", Port: 1000}
 var raftDataDir = "/tmp/raft_data"
-var raftEnableSingle = true
+var raftEnableSingle = false
 var raftPeers utils.NetAddrList
 var servePort uint
 
