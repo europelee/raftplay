@@ -123,6 +123,21 @@ func (p *Election) TransferLeaderShip(id, address string) error {
 	return nil
 }
 
+func (p *Election) RemoveSvr(id string) error {
+	if p.raft.State() != raft.Leader {
+		return ErrNotLeader
+	}
+	f := p.raft.RemoveServer(raft.ServerID(id), 0, 0)
+	if e := f.(raft.Future); e.Error() != nil {
+		if e.Error() == raft.ErrNotLeader {
+			return ErrNotLeader
+		}
+		return e.Error()
+	}
+	p.logger.Printf("node at %s remove successfully", id)
+	return nil
+}
+
 // Join let peers join into cluster
 func (p *Election) Join(id, addr string) error {
 	if p.raft.State() != raft.Leader {

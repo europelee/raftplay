@@ -43,6 +43,8 @@ func (h *Handler) Register(server *utils.APIServer) {
 		handler restful.RouteFunction
 	}{
 		{"/leaderShip", "POST", h.transferLeaderShip},
+		{"/addVoter", "POST", h.addVoter},
+		{"/remSvr", "POST", h.remServer},
 	}
 
 	for _, e := range endpoints {
@@ -59,6 +61,38 @@ func (h *Handler) transferLeaderShip(request *restful.Request, response *restful
 	err := request.ReadEntity(&node)
 	if err == nil {
 		err = h.operation.TransferLeaderShip(node.ID, node.ID)
+		if err == nil {
+			response.WriteHeaderAndEntity(http.StatusCreated, node)
+		}
+
+	}
+	if err != nil {
+		fmt.Println(err.Error())
+		response.WriteErrorString(http.StatusBadRequest, err.Error())
+	}
+}
+
+func (h *Handler) addVoter(request *restful.Request, response *restful.Response) {
+	node := new(Node)
+	err := request.ReadEntity(&node)
+	if err == nil {
+		err = h.operation.Join(node.ID, node.ID)
+		if err == nil {
+			response.WriteHeaderAndEntity(http.StatusCreated, node)
+		}
+
+	}
+	if err != nil {
+		fmt.Println(err.Error())
+		response.WriteErrorString(http.StatusBadRequest, err.Error())
+	}
+}
+
+func (h *Handler) remServer(request *restful.Request, response *restful.Response) {
+	node := new(Node)
+	err := request.ReadEntity(&node)
+	if err == nil {
+		err = h.operation.RemoveSvr(node.ID)
 		if err == nil {
 			response.WriteHeaderAndEntity(http.StatusCreated, node)
 		}
