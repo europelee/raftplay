@@ -211,7 +211,7 @@ func (p *Election) Start() error {
 	}
 	p.raft = r
 
-	if newNode {
+	if newNode && p.enableSingle {
 		var bootstrapConfig raft.Configuration
 
 		bootstrapConfig = raft.Configuration{
@@ -224,6 +224,7 @@ func (p *Election) Start() error {
 			},
 		}
 
+		/**
 		if !p.enableSingle {
 			// Add known peers to bootstrap
 			for _, node := range p.raftPeers {
@@ -239,7 +240,7 @@ func (p *Election) Start() error {
 				})
 			}
 		}
-
+		*/
 		f := r.BootstrapCluster(bootstrapConfig)
 		if err := f.Error(); err != nil {
 			log.Fatalf("error bootstrapping: %s", err)
