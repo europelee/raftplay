@@ -182,6 +182,7 @@ func (p *Election) Start() error {
 		log.Fatal(err)
 	}
 	newNode := !utils.PathExists(path.Join(p.raftDataDir, "raft_db"))
+	/**
 	if p.enableSingle && !newNode {
 		err := os.Remove(path.Join(p.raftDataDir, "raft_db"))
 		if err != nil {
@@ -189,6 +190,7 @@ func (p *Election) Start() error {
 		}
 		newNode = true
 	}
+	*/
 	cfg := raft.DefaultConfig()
 	cfg.LogOutput = os.Stdout
 	cfg.LocalID = raft.ServerID(p.raftBindAddr.String())

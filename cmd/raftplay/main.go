@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 
 	raftoperation "github.com/europelee/raftplay/internal/raft_operation"
@@ -34,14 +35,21 @@ func join() error {
 		fmt.Printf(err.Error())
 		return err
 	}
-	resp, err := http.Post(fmt.Sprintf("http://%s/operations/addVoter", joinAddr), "application-type/json", bytes.NewReader(b))
-	if err != nil {
-		fmt.Printf(err.Error())
-		return err
-	}
+	url := fmt.Sprintf("http://%s/operations/addVoter", joinAddr)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(b))
+	req.Header.Set("Content-Type", "application/json")
 
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		panic(err)
+	}
 	defer resp.Body.Close()
 
+	fmt.Println("response Status:", resp.Status)
+	fmt.Println("response Headers:", resp.Header)
+	body, _ := ioutil.ReadAll(resp.Body)
+	fmt.Println("response Body:", string(body))
 	return nil
 }
 
